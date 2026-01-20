@@ -76,7 +76,7 @@ Bucket policy restrictions
 ------------------------
 
 1️⃣ Create S3 Bucket
-
+---------------------
 Enable versioning (recommended)
 
 Block public access
@@ -84,13 +84,13 @@ Block public access
 Enable server-side encryption
 
 2️⃣ Create IAM Role for Lambda
-
+-------------------------------
 Attach policies:
 AmazonS3FullAccess (or custom minimal policy)
 CloudWatchLogsFullAccess
 
 3️⃣ Create Lambda Functions
-
+-----------------------------
 Functions included:
 
 Upload Handler
@@ -104,7 +104,7 @@ Delete File Handler
 Runtime: Python 3.10
 
 4️⃣ Configure API Gateway
-
+--------------------------
 Create REST API:
 
 Routes:
@@ -114,7 +114,7 @@ GET     /files
 DELETE  /delete
 
 5️⃣ Enable Pre-Signed URL Uploads
-
+----------------------------------
 Used to:
 
 Improve upload speed
@@ -124,15 +124,14 @@ Reduce Lambda execution cost
 Avoid file data passing through backend
 
 💻 Frontend Setup
+--------------------
 Open Frontend
 frontend/index.html
 
 Update API endpoint in:
-
 frontend/src/api.js
 
 Example:
-
 const API_URL = "https://your-api-id.execute-api.region.amazonaws.com/prod";
 
 ------------------------------------------------------------------------------------
