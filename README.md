@@ -1,146 +1,92 @@
-# aws-serverless-cloud-storage
-☁️ Personal Cloud Storage Application (AWS Serverless)  A secure, scalable, serverless cloud storage application built using AWS services. This project allows users to upload, download, manage, and organize files through a web-based interface — similar to a simplified Google Drive.
+# AWS Serverless Cloud Storage
 
-🚀 Features
---------------
+> Your own personal cloud storage — like a simplified Google Drive, but you own it.
 
-✔ Secure file upload and download
-✔ Serverless backend architecture
-✔ Scalable cloud storage using Amazon S3
-✔ REST API powered by API Gateway
-✔ AWS Lambda for backend logic
-✔ IAM-based access control
-✔ Pre-signed URL uploads for high performance
-✔ Event-driven processing support
-✔ Cost-optimized architecture
-✔ Web-based frontend interface
+Hey there! This is my personal cloud storage project built entirely on AWS serverless services. I wanted to create something practical while learning cloud architecture, and what better way than building my own file storage system?
 
-🏗 Architecture Overview
+## What Does It Do?
 
-| Layer      | Technology             |
-| ---------- | ---------------------- |
-| Frontend   | HTML, CSS, JavaScript  |
-| Backend    | AWS Lambda (Python)    |
-| Storage    | Amazon S3              |
-| API        | AWS API Gateway        |
-| Security   | IAM Roles & Policies   |
-| Monitoring | CloudWatch             |
-| Deployment | Manual / CLI / Console |
+Simply put, it lets you:
+- **Upload files** securely to the cloud
+- **Download them** whenever you need
+- **Browse and manage** your files through a clean web interface
+- **Delete stuff** you no longer need
 
-Architecture Flow:
--------------------
+All of this runs without any servers to manage — it scales automatically and you only pay for what you use.
 
-User Browser
-     |
-     v
-Frontend Web App
-     |
-     v
-API Gateway
-     |
-     v
-AWS Lambda Functions
-     |
-     v
-Amazon S3 Bucket
+## The Tech Behind It
 
-📁 Project Structure
-----------------------
-personal-cloud-storage-app/
-├── backend/           # Lambda functions
-├── frontend/          # Web UI
-├── infrastructure/    # AWS policies & architecture
-├── screenshots/       # Application UI images
-├── README.md
-└── LICENSE
+| What | How |
+|------|-----|
+| Frontend | React with AWS Amplify |
+| Backend | AWS Lambda (Python) |
+| Storage | Amazon S3 |
+| API | AWS API Gateway |
+| Infrastructure | AWS SAM |
+| Security | IAM Roles & Policies |
 
-🔐 Security Implementation
-----------------------------
-This project follows AWS security best practices:
+### How It All Connects
 
-IAM Role-based access control
+```
+You (Browser) → React Frontend → API Gateway → Lambda Functions → S3 Bucket
+```
 
-Least privilege permissions
+Pretty straightforward, right? The frontend talks to API Gateway, which triggers Lambda functions that handle all the S3 operations.
 
-Private S3 buckets
+## Project Structure
 
-Controlled public access
+```
+├── personal-cloud-backend/    # The serverless backend
+│   ├── hello_world/           # Lambda function code
+│   ├── template.yaml          # SAM infrastructure template
+│   └── tests/                 # Unit & integration tests
+│
+└── personal-cloud-frontend/   # The React web app
+    ├── src/                   # React components
+    ├── public/                # Static assets
+    └── amplify/               # AWS Amplify config
+```
 
-Pre-signed URLs for secure uploads
+## Getting Started
 
-API Gateway authorization support
+### Backend Setup
 
-Bucket policy restrictions
+1. **Install AWS SAM CLI** if you haven't already
+2. Navigate to `personal-cloud-backend/`
+3. Build and deploy:
+   ```bash
+   sam build
+   sam deploy --guided
+   ```
 
-⚙ Backend Setup (AWS)
-------------------------
+### Frontend Setup
 
-1️⃣ Create S3 Bucket
----------------------
-Enable versioning (recommended)
+1. Navigate to `personal-cloud-frontend/`
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Update the API endpoint in your config
+4. Run locally:
+   ```bash
+   npm start
+   ```
 
-Block public access
+## Security Notes
 
-Enable server-side encryption
+I've tried to follow AWS best practices here:
+- S3 buckets are private by default
+- Pre-signed URLs for secure file uploads
+- IAM roles with minimal permissions
+- No credentials hardcoded anywhere
 
-2️⃣ Create IAM Role for Lambda
--------------------------------
-Attach policies:
-AmazonS3FullAccess (or custom minimal policy)
-CloudWatchLogsFullAccess
+## Why I Built This
 
-3️⃣ Create Lambda Functions
------------------------------
-Functions included:
+Honestly? To learn. Cloud computing is fascinating, and building something real is the best way to understand how all these AWS services work together. Plus, now I have my own cloud storage that I actually use!
 
-Upload Handler
+---
 
-Download Handler
+**Built by [Santhosh V](https://github.com/SANTHOSH-VJ)** — Cloud Enthusiast & AWS Learner
 
-List Files Handler
-
-Delete File Handler
-
-Runtime: Python 3.10
-
-4️⃣ Configure API Gateway
---------------------------
-Create REST API:
-
-Routes:
-POST    /upload
-GET     /download
-GET     /files
-DELETE  /delete
-
-5️⃣ Enable Pre-Signed URL Uploads
-----------------------------------
-Used to:
-
-Improve upload speed
-
-Reduce Lambda execution cost
-
-Avoid file data passing through backend
-
-💻 Frontend Setup
---------------------
-Open Frontend
-frontend/index.html
-
-Update API endpoint in:
-frontend/src/api.js
-
-Example:
-const API_URL = "https://your-api-id.execute-api.region.amazonaws.com/prod";
-
-------------------------------------------------------------------------------------
-👨‍💻 Author
-
-SANTHOSH V
-Cloud Enthusiast | AWS Learner 
-
-GitHub: https://github.com/SANTHOSH-VJ
-
-------------------------------------------------------------------------------------
+Feel free to fork, improve, or just poke around the code. Happy building!
 
