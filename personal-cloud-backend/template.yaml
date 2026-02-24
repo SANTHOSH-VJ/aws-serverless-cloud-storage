@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: personal-cloud-backend
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: python3.13
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        BUCKET_NAME: personal-cloud-storage-clouddrive
+
+Resources:
+
+  UploadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.upload_handler
+      Policies:
+        - S3CrudPolicy:
+            BucketName: personal-cloud-storage-clouddrive
+      Events:
+        UploadApi:
+          Type: Api
+          Properties:
+            Path: /upload
+            Method: post
+
+  ListFilesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.list_files_handler
+      Policies:
+        - S3CrudPolicy:
+            BucketName: personal-cloud-storage-clouddrive
+      Events:
+        ListFilesApi:
+          Type: Api
+          Properties:
+            Path: /list
+            Method: get
+
+  DownloadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.download_handler
+      Policies:
+        - S3CrudPolicy:
+            BucketName: personal-cloud-storage-clouddrive
+      Events:
+        DownloadApi:
+          Type: Api
+          Properties:
+            Path: /download
+            Method: get
+
+Outputs:
+  ApiBaseUrl:
+    Description: API Gateway base URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod"

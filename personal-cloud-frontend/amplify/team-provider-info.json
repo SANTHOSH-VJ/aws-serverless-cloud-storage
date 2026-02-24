@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-personalcloud-dev-75df3-authRole",
+      "UnauthRoleArn": "arn:aws:iam::051826704878:role/amplify-personalcloud-dev-75df3-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::051826704878:role/amplify-personalcloud-dev-75df3-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-personalcloud-dev-75df3-deployment",
+      "UnauthRoleName": "amplify-personalcloud-dev-75df3-unauthRole",
+      "StackName": "amplify-personalcloud-dev-75df3",
+      "StackId": "arn:aws:cloudformation:us-east-1:051826704878:stack/amplify-personalcloud-dev-75df3/ee5d0f70-1153-11f1-9653-0eccda63659f",
+      "AmplifyAppId": "d1wnw541jq2n59"
+    }
+  }
+}
