@@ -2,6 +2,7 @@ import { withAuthenticator } from "@aws-amplify/ui-react";
 import { useEffect, useState } from "react";
 import { fetchAuthSession } from "aws-amplify/auth";
 import "@aws-amplify/ui-react/styles.css";
+import "./App.css";
 
 function App({ signOut }) {
   const [email, setEmail] = useState("");
@@ -134,33 +135,38 @@ function App({ signOut }) {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Welcome {email}</h2>
+    <div style={{ padding: 20 }} className="home">
+      <h2 className="heading">Welcome {email}</h2>
+      <div className="home-container">
+        <h3>Upload File</h3>
+        <div className="input-container">
+          <input type="file" onChange={handleUpload} />
+        </div>
+        <h3 className="your-files">Your Files</h3>
+        {files.length === 0 ? (
+          <p>No files uploaded yet.</p>
+        ) : (
+          <ul className="list">
+            {files.map((file, index) => (
+              <li key={index} className="list-item">
+                {file}
+                <button
+                  style={{ marginLeft: 10 }}
+                  onClick={() => handleDownload(file)}
+                  className="download-button"
+                >
+                  Download
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      <h3>Upload File</h3>
-      <input type="file" onChange={handleUpload} />
-
-      <h3>Your Files</h3>
-      {files.length === 0 ? (
-        <p>No files uploaded yet.</p>
-      ) : (
-        <ul>
-          {files.map((file, index) => (
-            <li key={index}>
-              {file}
-              <button
-                style={{ marginLeft: 10 }}
-                onClick={() => handleDownload(file)}
-              >
-                Download
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <br />
-      <button onClick={signOut}>Sign Out</button>
+        <br />
+        <div className="sign-out-container">
+          <button onClick={signOut} className="sign-out-button">Sign Out</button>
+        </div>
+      </div>
     </div>
   );
 }
