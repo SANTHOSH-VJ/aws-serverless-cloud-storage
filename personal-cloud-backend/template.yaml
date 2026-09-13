@@ -11,6 +11,17 @@ Globals:
     Environment:
       Variables:
         BUCKET_NAME: personal-cloud-storage-clouddrive
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+      AllowHeaders: "'Content-Type,Authorization'"
+      AllowOrigin: "'*'"
+    Auth:
+      AddDefaultAuthorizerToCorsPreflight: false
+      DefaultAuthorizer: CognitoAuthorizer
+      Authorizers:
+        CognitoAuthorizer:
+          UserPoolArn: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/us-east-1_AwLrx4j9e"
 
 Resources:
 
@@ -58,6 +69,24 @@ Resources:
           Properties:
             Path: /download
             Method: get
+
+  DeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.delete_handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:DeleteObject
+              Resource: !Sub "arn:aws:s3:::personal-cloud-storage-clouddrive/*"
+      Events:
+        DeleteApi:
+          Type: Api
+          Properties:
+            Path: /delete
+            Method: delete
 
 Outputs:
   ApiBaseUrl:

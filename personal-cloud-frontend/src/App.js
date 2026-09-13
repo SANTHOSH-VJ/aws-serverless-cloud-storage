@@ -134,6 +134,67 @@ function App({ signOut }) {
     }
   }
 
+  // =========================
+  // SHARE FILE
+  // =========================
+  async function handleShare(fileKey) {
+    try {
+      const token = await getAuthToken();
+
+      const response = await fetch(
+        `${API_BASE}/download?fileKey=${encodeURIComponent(fileKey)}&share=true`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to get share URL");
+      }
+
+      const data = await response.json();
+      await navigator.clipboard.writeText(data.downloadUrl);
+      alert("Share link copied!");
+    } catch (error) {
+      console.error("Share error:", error);
+      alert("Failed to copy share link.");
+    }
+  }
+
+  // =========================
+  // DELETE FILE
+  // =========================
+  async function handleDelete(fileKey) {
+    if (!window.confirm("Are you sure you want to delete this file?")) return;
+
+    try {
+      const token = await getAuthToken();
+
+      const response = await fetch(
+        `${API_BASE}/delete?fileKey=${encodeURIComponent(fileKey)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to delete file");
+      }
+
+      alert("File deleted successfully!");
+      loadFiles(); // Refresh the list
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert(`Delete failed: ${error.message}`);
+    }
+  }
+
   return (
     <div style={{ padding: 20 }} className="home">
       <h2 className="heading">Welcome {email}</h2>
@@ -156,6 +217,20 @@ function App({ signOut }) {
                   className="download-button"
                 >
                   Download
+                </button>
+                <button
+                  style={{ marginLeft: 10 }}
+                  onClick={() => handleShare(file)}
+                  className="share-button"
+                >
+                  Share
+                </button>
+                <button
+                  style={{ marginLeft: 10 }}
+                  onClick={() => handleDelete(file)}
+                  className="delete-button"
+                >
+                  Delete
                 </button>
               </li>
             ))}
