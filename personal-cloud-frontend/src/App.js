@@ -1,18 +1,35 @@
 import { withAuthenticator } from "@aws-amplify/ui-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { fetchAuthSession } from "aws-amplify/auth";
 import "@aws-amplify/ui-react/styles.css";
 import "./App.css";
 
-function App({ signOut }) {
+// Components
+import Sidebar from "./components/Sidebar";
+import Header from "./components/Header";
+import UploadCard from "./components/UploadCard";
+import StatsCards from "./components/StatsCards";
+import FileList from "./components/FileList";
+import EmptyState from "./components/EmptyState";
+import { ToastProvider, useToast } from "./components/ToastContext";
+
+function Dashboard({ signOut }) {
   const [email, setEmail] = useState("");
   const [files, setFiles] = useState([]);
+  
+  // UI States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [deletingFiles, setDeletingFiles] = useState(new Set());
+  const [sharingFiles, setSharingFiles] = useState(new Set());
+  
+  const { addToast } = useToast();
 
-  const API_BASE =
-    "https://9t38vahg3f.execute-api.us-east-1.amazonaws.com/Prod";
+  const API_BASE = "https://9t38vahg3f.execute-api.us-east-1.amazonaws.com/Prod";
 
   useEffect(() => {
     initializeUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function initializeUser() {
@@ -52,6 +69,7 @@ function App({ signOut }) {
       setFiles(data.files || []);
     } catch (error) {
       console.error("Load files error:", error);
+      addToast("Failed to load files", "error");
     }
   }
 
@@ -62,6 +80,7 @@ function App({ signOut }) {
     const file = event.target.files[0];
     if (!file) return;
 
+    setIsUploading(true);
     try {
       const token = await getAuthToken();
 
@@ -97,11 +116,14 @@ function App({ signOut }) {
         throw new Error("S3 upload failed");
       }
 
-      alert("Upload successful!");
+      addToast("File uploaded successfully");
       loadFiles(); // refresh list
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Upload failed. Check console.");
+      addToast("Upload failed", "error");
+    } finally {
+      setIsUploading(false);
+      event.target.value = null; // reset input
     }
   }
 
@@ -130,7 +152,7 @@ function App({ signOut }) {
       window.open(data.downloadUrl, "_blank");
     } catch (error) {
       console.error("Download error:", error);
-      alert("Download failed.");
+      addToast("Download failed", "error");
     }
   }
 
@@ -138,6 +160,7 @@ function App({ signOut }) {
   // SHARE FILE
   // =========================
   async function handleShare(fileKey) {
+    setSharingFiles(prev => new Set(prev).add(fileKey));
     try {
       const token = await getAuthToken();
 
@@ -156,10 +179,16 @@ function App({ signOut }) {
 
       const data = await response.json();
       await navigator.clipboard.writeText(data.downloadUrl);
-      alert("Share link copied!");
+      addToast("Share link copied!");
     } catch (error) {
       console.error("Share error:", error);
-      alert("Failed to copy share link.");
+      addToast("Failed to copy share link", "error");
+    } finally {
+      setSharingFiles(prev => {
+        const next = new Set(prev);
+        next.delete(fileKey);
+        return next;
+      });
     }
   }
 
@@ -169,6 +198,7 @@ function App({ signOut }) {
   async function handleDelete(fileKey) {
     if (!window.confirm("Are you sure you want to delete this file?")) return;
 
+    setDeletingFiles(prev => new Set(prev).add(fileKey));
     try {
       const token = await getAuthToken();
 
@@ -187,62 +217,73 @@ function App({ signOut }) {
         throw new Error(errData.message || "Failed to delete file");
       }
 
-      alert("File deleted successfully!");
+      addToast("File deleted successfully!");
       loadFiles(); // Refresh the list
     } catch (error) {
       console.error("Delete error:", error);
-      alert(`Delete failed: ${error.message}`);
+      addToast(`Delete failed: ${error.message}`, "error");
+    } finally {
+      setDeletingFiles(prev => {
+        const next = new Set(prev);
+        next.delete(fileKey);
+        return next;
+      });
     }
   }
 
-  return (
-    <div style={{ padding: 20 }} className="home">
-      <h2 className="heading">Welcome {email}</h2>
-      <div className="home-container">
-        <h3>Upload File</h3>
-        <div className="input-container">
-          <input type="file" onChange={handleUpload} />
-        </div>
-        <h3 className="your-files">Your Files</h3>
-        {files.length === 0 ? (
-          <p>No files uploaded yet.</p>
-        ) : (
-          <ul className="list">
-            {files.map((file, index) => (
-              <li key={index} className="list-item">
-                {file}
-                <button
-                  style={{ marginLeft: 10 }}
-                  onClick={() => handleDownload(file)}
-                  className="download-button"
-                >
-                  Download
-                </button>
-                <button
-                  style={{ marginLeft: 10 }}
-                  onClick={() => handleShare(file)}
-                  className="share-button"
-                >
-                  Share
-                </button>
-                <button
-                  style={{ marginLeft: 10 }}
-                  onClick={() => handleDelete(file)}
-                  className="delete-button"
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+  // Client-side search logic
+  const filteredFiles = useMemo(() => {
+    if (!searchTerm) return files;
+    const lowerTerm = searchTerm.toLowerCase();
+    return files.filter(f => f.toLowerCase().includes(lowerTerm));
+  }, [files, searchTerm]);
 
-        <br />
-        <div className="sign-out-container">
-          <button onClick={signOut} className="sign-out-button">Sign Out</button>
+  return (
+    <div className="app-container">
+      <Sidebar />
+      <div className="main-content">
+        <Header 
+          email={email} 
+          signOut={signOut} 
+          searchTerm={searchTerm} 
+          setSearchTerm={setSearchTerm} 
+        />
+        
+        <div className="dashboard-content">
+          <div className="dashboard-scroll-container">
+            <div className="welcome-section">
+              <h1>Welcome, {email ? email.split('@')[0] : 'User'} 👋</h1>
+              <p>Manage your files securely in the cloud.</p>
+            </div>
+
+            <UploadCard onUpload={handleUpload} isUploading={isUploading} />
+            
+            <StatsCards totalFiles={files.length} />
+
+            {files.length === 0 ? (
+              <EmptyState onUpload={handleUpload} isUploading={isUploading} />
+            ) : (
+              <FileList 
+                files={filteredFiles} 
+                onDownload={handleDownload}
+                onShare={handleShare}
+                onDelete={handleDelete}
+                deletingFiles={deletingFiles}
+                sharingFiles={sharingFiles}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function App({ signOut }) {
+  return (
+    <ToastProvider>
+      <Dashboard signOut={signOut} />
+    </ToastProvider>
   );
 }
 
